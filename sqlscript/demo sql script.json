@@ -1,0 +1,20 @@
+{
+	"name": "demo sql script",
+	"properties": {
+		"folder": {
+			"name": "SQL Scripts"
+		},
+		"content": {
+			"query": "Select 100*2;",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
