@@ -1,0 +1,21 @@
+{
+	"name": "2_explore_calendar_data",
+	"properties": {
+		"description": "Practice sql script to pull data from Calendar.csv file.",
+		"folder": {
+			"name": "nyc_taxi/discovery"
+		},
+		"content": {
+			"query": "CREATE EXTERNAL DATA SOURCE calendar_data_raw\nWITH (\n    LOCATION = 'https://synapsecoursedlhp.blob.core.windows.net/nyc-taxi-data/raw'\n)\n\nDROP EXTERNAL DATA SOURCE calendar_data_raw\n\nSELECT * FROM sys.external_data_sources\n\nSELECT *\nFROM \nOPENROWSET\n(\n    BULK 'calendar.csv',\n    DATA_SOURCE = 'calendar_data_raw',\n    FORMAT = 'CSV',\n    PARSER_VERSION = '2.0',\n    HEADER_ROW = TRUE,\n    FIELDTERMINATOR =',',\n    ROWTERMINATOR='\\n'\n) \nWITH(\n    date_key VARCHAR(10),\n    [date] VARCHAR(15),\n    [year] VARCHAR(15),\n    [month] VARCHAR(15),\n    [day] VARCHAR(15),\n    day_name VARCHAR(15),\n    day_of_year VARCHAR(15),\n    week_of_month VARCHAR(15),\n    week_of_year VARCHAR(15),\n    month_name VARCHAR(15),\n    year_month VARCHAR(15),\n    year_week VARCHAR(15)\n)\nAS [result] ",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_discovery",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
