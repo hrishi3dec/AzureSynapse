@@ -1,0 +1,20 @@
+{
+	"name": "9_explore_data _assignment",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/discovery"
+		},
+		"content": {
+			"query": "USE nyc_taxi_discovery\nGO\n\n--Query fr0m folders using wildcard characters\nSELECT TOP 100 *\nFROM \nOPENROWSET(\n    BULK '/trip_data_green_parquet/year=2020/month=01/*.parquet',\n    DATA_SOURCE = 'calendar_data_raw',\n    FORMAT = 'PARQUET'\n) AS [RESULT]\n\n--Get filename\n\nSELECT TOP 100 \nResult.filename() as 'filename',\nResult.*\nFROM \nOPENROWSET(\n    BULK '/trip_data_green_parquet/year=2020/month=**',\n    DATA_SOURCE = 'calendar_data_raw',\n    FORMAT = 'PARQUET'\n) AS [RESULT]",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_discovery",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
