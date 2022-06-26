@@ -1,0 +1,20 @@
+{
+	"name": "9_explore_trip_data_green_delta",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/discovery"
+		},
+		"content": {
+			"query": "USE nyc_taxi_discovery\nGO\n\n--Querying data from Delta files\nSELECT TOP 100 *\nFROM\nOPENROWSET (\n    Bulk 'trip_data_green_delta',\n    DATA_SOURCE = 'calendar_data_raw',\n    FORMAT = 'DELTA'\n)\nAS trip_data\n\n--Getting the data types for each column\nEXEC sp_describe_first_result_set N'SELECT TOP 100 *\nFROM\nOPENROWSET (\n    Bulk ''trip_data_green_delta'',\n    DATA_SOURCE = ''calendar_data_raw'',\n    FORMAT = ''DELTA''\n)\nAS trip_data'",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_discovery",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
