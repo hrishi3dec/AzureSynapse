@@ -1,0 +1,20 @@
+{
+	"name": "explore_data _assignment",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/discovery"
+		},
+		"content": {
+			"query": "USE nyc_taxi_discovery\nGO\n\n--Query fr0m folders using wildcard characters\nSELECT TOP 100 *\nFROM \nOPENROWSET(\n    BULK '/trip_data_green_parquet/year=2020/month=01/*.parquet',\n    DATA_SOURCE = 'calendar_data_raw',\n    FORMAT = 'PARQUET'\n) AS [RESULT]\n\n--Get filename\nSELECT TOP 100 \nResult.filename() as 'filename',\nResult.*\nFROM \nOPENROWSET(\n    BULK '/trip_data_green_parquet/year=2020/month=01/*.parquet',\n    DATA_SOURCE = 'calendar_data_raw',\n    FORMAT = 'PARQUET'\n) AS [RESULT]\n\n--Query from sub folders with filepath\nSELECT TOP 100\n    Result.filepath() as 'file_path',\n    Result.*\nFROM\nOPENROWSET (\n    BULK 'trip_data_green_parquet/**',\n    DATA_SOURCE = 'calendar_data_raw',\n    FORMAT = 'PARQUET'\n) as [Result] \n\n\n--use filepath to target partitions\nSELECT \n    Result.filepath(1) as 'Year',\n    Result.filepath(2) as 'Month',\n    Count(1) as record_count\nFROM\nOPENROWSET (\n    BULK 'trip_data_green_parquet/year=*/month=*/*.parquet',\n    DATA_SOURCE = 'calendar_data_raw',\n    FORMAT = 'PARQUET'\n) as [Result] \nWHERE Result.filepath(1) ='2020'\nAND Result.filepath(2) in ('06','07','08')\nGROUP BY Result.filepath(1), Result.filepath(2)\nORDER BY Result.filepath(1), Result.filepath(2)\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_discovery",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
