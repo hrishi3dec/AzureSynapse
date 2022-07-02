@@ -1,0 +1,20 @@
+{
+	"name": "data_discovery_assignment",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/discovery"
+		},
+		"content": {
+			"query": "USE nyc_taxi_discovery\nGO\n\nWITH v_payment_type AS\n(\n        SELECT \n            CAST(JSON_VALUE(jsonDoc, '$.payment_type') AS BIGINT) payment_type,\n            CAST(JSON_VALUE(jsonDoc, '$.payment_type_desc') AS VARCHAR(15)) payment_type_desc\n        FROM \n        OPENROWSET (\n            BULK 'payment_type.json',\n            DATA_SOURCE ='calendar_data_raw',\n            FORMAT = 'CSV',\n            PARSER_VERSION = '1.0',\n            FIELDTERMINATOR = '0x0b',\n            FIELDQUOTE = '0x0b'\n        )\n        WITH\n        (\n            jsonDoc NVARCHAR(MAX)\n        ) AS payment_type\n),\n\nv_taxi_zone AS \n(\n        SELECT\n            *\n        FROM\n        OPENROWSET(\n            BULK 'https://synapsecoursedlhp.dfs.core.windows.net/nyc-taxi-data/raw/taxi_zone.csv',\n            FORMAT = 'CSV',\n            PARSER_VERSION = '2.0',\n            HEADER_ROW = TRUE,\n            FIELDTERMINATOR = ',',\n            ROWTERMINATOR ='\\n'\n        )\n        WITH\n        (\n            LocationID INT,\n            Borough VARCHAR(15),\n            Zone VARCHAR(50),\n            service_zone VARCHAR(15)\n        ) AS [result]\n),\n\nv_trip_data AS \n(\n        SELECT\n            *\n        FROM\n        OPENROWSET(\n            BULK 'trip_data_green_csv/year=2020/month=01/green_tripdata_2020-01.csv',\n            DATA_SOURCE = 'calendar_data_raw',\n            FORMAT = 'CSV',\n            PARSER_VERSION = '2.0',\n            HEADER_ROW = TRUE\n        ) AS [result]\n)\n\nSELECT \n    v_taxi_zone.Borough,\n    COUNT(1) as total_trips,\n    SUM(CASE WHEN v_payment_type.payment_type_desc='Cash' THEN 1 ELSE 0 END) as cash_trips,\n    SUM(CASE WHEN v_payment_type.payment_type_desc='Credit card' THEN 1 ELSE 0 END) as card_trips,\n    CAST((SUM(CASE WHEN v_payment_type.payment_type_desc='Cash' THEN 1 ELSE 0 END) / CAST(COUNT(1) as DECIMAL)) * 100 AS DECIMAL(5, 2))  as cash_trips_percentage,\n    CAST((SUM(CASE WHEN v_payment_type.payment_type_desc='Credit card' THEN 1 ELSE 0 END) / CAST(COUNT(1) as DECIMAL)) * 100 AS DECIMAL(5, 2))  as card_trips_percentage\nFROM v_trip_data \nLEFT JOIN v_taxi_zone ON v_trip_data.PULocationID=v_taxi_zone.locationID\nLEFT JOIN v_payment_type ON v_trip_data.payment_type = v_payment_type.payment_type\nWHERE v_payment_type.payment_type_desc IN ('Cash' , 'Credit card')\nGROUP BY v_taxi_zone.Borough\n\n\n\n\n\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_discovery",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
